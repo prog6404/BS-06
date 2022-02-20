@@ -13,8 +13,8 @@ public final class Constants {
         }
 
         public static class Collector {
-            public static final int _collector = 4;
-            public static final int _move_c = 5;
+            public static final int _collector = 5;
+            public static final int _move_c = 4;
         }
 
         public static class Storage {
@@ -25,7 +25,7 @@ public final class Constants {
             public static final int _left = 8;
             public static final int _right = 15;
             
-            public static final int _pitch = 9;
+            public static final int _pitch = 12;
             public static final int _yaw = 10;
         }
 
@@ -37,5 +37,14 @@ public final class Constants {
     public static class Control_map {
         public static final int _pilot = 0;
         public static final int _copilot = 1;
+    }
+
+    public static class Sensors {
+        public static final int _S1 = 7;
+    }
+
+    public static class Encoders {
+        public static final int p1 = 0;
+        public static final int p2 = 1; 
     }
 }
