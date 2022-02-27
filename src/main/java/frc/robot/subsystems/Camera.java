@@ -1,6 +1,7 @@
 
 package frc.robot.subsystems;
-//Imports
+
+// IMPORTS
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -9,20 +10,19 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-//Code
-public class CameraServo extends SubsystemBase {
-  //Criando o servo
-  Servo servo;
-  public CameraServo() {
-    //Codigo da cam
+// CODE
+public class Camera extends SubsystemBase {
+
+  public Camera() {
+    
+    //Codigo da camera
     new Thread(() -> {
 
       // Criacao da camera
       UsbCamera camera = CameraServer.startAutomaticCapture();
-      camera.setResolution(640, 480);
+      camera.setResolution(640, 480); //resolucao da camera
 
       // Criacao da resolucao da camera
       CvSink cvsink = CameraServer.getVideo();
@@ -44,18 +44,8 @@ public class CameraServo extends SubsystemBase {
         outputStream.putFrame(source);
       }
     }).start();
-
-    // Criando o servo e dando o valor da PWM
-    servo = new Servo(9);
-  }
-
-  // Criando a funcao de angulacao
-  public void servomov(double servoangle) {
-    servo.setAngle(servoangle);
   }
 
   @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+  public void periodic() {}
 }

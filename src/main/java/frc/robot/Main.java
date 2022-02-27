@@ -1,8 +1,10 @@
 
 package frc.robot;
 
+// IMPORTS
 import edu.wpi.first.wpilibj.RobotBase;
 
+// CODE
 public final class Main {
   private Main() {}
 

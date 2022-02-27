@@ -1,39 +1,50 @@
 
 package frc.robot.subsystems;
 
-//Imports
+// IMPORTS
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import edu.wpi.first.wpilibj.Encoder;
+// import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-//Code
+// CODE
 public class Drivetrain extends SubsystemBase {
-  // Criando os controladores do nosso sistema de tracao
-  private WPI_TalonSRX _lf, _lb, _rf, _rb;
-  private MotorControllerGroup _l, _r;
+
+  //TESTE
   //private Encoder e;
+
+  // CRIANDO OS CONTROLADORES DO SISTEMA DE TRACAO
+  private WPI_TalonSRX _lfront, _lback, _rfront, _rback;
+
+  // CRIANDO O AGRUPAMENTO DOS CONTROLADORES
+  private MotorControllerGroup _left, _right;
+  
+  // CRIANDO O DIFERENCIAL DO SISTEMA DE TRACAO
   private DifferentialDrive _drive;
 
     public Drivetrain() {
-    // Definindo os controladores para cada motor da tracao
+    
+    //TESTE
     //e = new Encoder(0, 1);
     //e.setDistancePerPulse(1 / 48.0);
 
-    _lf = new WPI_TalonSRX(Constants.Motors.Drivetrain._leftfront);
-    _lb = new WPI_TalonSRX(Constants.Motors.Drivetrain._leftback);
-    _rf = new WPI_TalonSRX(Constants.Motors.Drivetrain._rightfront);
-    _rb = new WPI_TalonSRX(Constants.Motors.Drivetrain._rightback);
+    // DEFININDO OS CONTROLADORES DO SISTEMA DE TRACAO
+    _lfront = new WPI_TalonSRX(Constants.Motors.Drivetrain._leftfront);
+    _lback = new WPI_TalonSRX(Constants.Motors.Drivetrain._leftback);
+    _rfront = new WPI_TalonSRX(Constants.Motors.Drivetrain._rightfront);
+    _rback = new WPI_TalonSRX(Constants.Motors.Drivetrain._rightback);
 
-    _l = new MotorControllerGroup(_lf, _lb);
-    _r = new MotorControllerGroup(_rf, _rb);
+    // DEFININDO OS AGRUPAMENTO DOS CONTROLADORES
+    _left = new MotorControllerGroup(_lfront, _lback);
+    _right = new MotorControllerGroup(_rfront, _rback);
 
-    _drive = new DifferentialDrive(_l, _r);
+    // DEFININDO O DIFERENCIAL DO SISTEMA DE TRACAO
+    _drive = new DifferentialDrive(_left, _right);
   }
 
-  // Definindo os valores de Y e X para a tracao, fazendo ela andar
+  // FUNCAO DO SISTEMA DE TRACAO (EIXO Y, EIXO X)
   public void direction(double Y, double X) {
     _drive.arcadeDrive(Y, X);
   }

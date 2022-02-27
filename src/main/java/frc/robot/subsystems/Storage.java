@@ -1,7 +1,7 @@
 
 package frc.robot.subsystems;
 
-//Imports
+// IMPORTS
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
@@ -9,30 +9,33 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-//Code
+// CODE
 public class Storage extends SubsystemBase {
-  // Criando os controladores do nosso armazenador
+
+  // CRIANDO OS CONTROLADORES DO SISTEMA DE ARAMAZENADOR
   private VictorSPX _storage;
 
-  //criando os sensores do armazenador
-  private DigitalInput S1;
-
+  // CRIANDO OS SENSORES DO SISTEMA DE ARMAZENADOR
+  private DigitalInput _sensor_sto;
   public boolean estado = false;
 
   public Storage() {
-    // Definindo o controlador do nosso armazenador
+
+    // DEFININDO OS CONTROLADORES DO SISTEMA DE ARMAZENADOR
     _storage = new VictorSPX(Constants.Motors.Storage._storage);
-    //Definindo os sensores do armazenador
-    S1 = new DigitalInput(Constants.Sensors._S1);
+
+    // DEFININDO OS SENSORES DO SISTEMA DE ARMAZENADOR
+    _sensor_sto = new DigitalInput(Constants.Sensors._sensor_sto);
   }
 
-  // Criando a funcao da velocidade do nosso armazenador armazenar a bola
+  // CRIANDO FUNCAO DO ARMAZENADOR
   public void stor(double vel) {
     _storage.set(VictorSPXControlMode.PercentOutput, vel);
   } 
 
+  // CRIANDO FUNCAO DOS SENSORES
   public boolean sensorS1() {
-    return S1.get();
+    return _sensor_sto.get();
   }
 
   @Override

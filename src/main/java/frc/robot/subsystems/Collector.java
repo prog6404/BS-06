@@ -1,7 +1,7 @@
 
 package frc.robot.subsystems;
 
-//Imports
+// IMPORTS
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
@@ -9,28 +9,37 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-//Code
+// CODE
 public class Collector extends SubsystemBase {
-  // Criando o controlador do coletor
-  private VictorSPX m_collector;
-  private VictorSPX collector_move;
-  public DigitalInput limitswitchBAIXO;
-  public DigitalInput limitswitchCIMA;
+ 
+  // CRIANDO OS CONTROLADORES DO SISTEMA DE (MOVIMENTACAO DO) COLETOR
+  private VictorSPX _coll;
+  private VictorSPX _coll_move;
+
+  // CRIANDO OS SENSORES DO SISTEMA DE MOVIMENTACAO DO COLETOR
+  public DigitalInput _limitSHORT;
+  public DigitalInput _limitUP;
+ 
   public Collector() {
-    // Definindo o controlador do coletor
-    m_collector = new VictorSPX(Constants.Motors.Collector._collector);
-    collector_move = new VictorSPX(Constants.Motors.Collector._move_c);
-    limitswitchBAIXO = new DigitalInput(5);
-    limitswitchCIMA = new DigitalInput(4);
+
+    // DEFININDO OS CONTROLADORES DO SISTEMA DE (MOVIMENTACAO DO) COLETOR
+    _coll = new VictorSPX(Constants.Motors.Collector._collector);
+    _coll_move = new VictorSPX(Constants.Motors.Collector._move_coll);
+
+    // DEFININDO OS SENSORES DO SISTEMA DE MOVIMENTACAO DO COLETOR
+    _limitSHORT = new DigitalInput(5);
+    _limitUP = new DigitalInput(4);
+
   }
 
-  // Funcao para setar a velocidade do coletor
+  // FUNCAO DO SISTEMA DE COLETOR
   public void collect(double c) {
-    m_collector.set(ControlMode.PercentOutput, c);
+    _coll.set(ControlMode.PercentOutput, c);
   }
 
+  // FUNCAO DO SISTEMA DE MOVINTACAO DO COLETOR
   public void move_c(double move) {
-    collector_move.set(ControlMode.PercentOutput, move);
+    _coll_move.set(ControlMode.PercentOutput, move);
   }
 
   @Override

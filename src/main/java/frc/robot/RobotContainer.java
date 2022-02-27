@@ -1,178 +1,227 @@
 
 package frc.robot;
 
+// IMPORTS
 import com.kauailabs.navx.frc.AHRS;
-import com.kauailabs.vmx.AHRSJNI;
+// import com.kauailabs.vmx.AHRSJNI;
 
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Encoder;
+// import edu.wpi.first.wpilibj.DigitalInput;
+// import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.SerialPort.Port;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+// import edu.wpi.first.wpilibj.SerialPort.Port;
+// import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Collector;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.CameraServo;
+import frc.robot.commands.Autonomo;
+import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Storage;
+// import pabeles.concurrency.ConcurrencyOps.Reset;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
+// CODE
 public class RobotContainer {
 
-  // Criando os objetos dos nossos subsistemas
-  XboxController control;
-  XboxController control_2;
-  Drivetrain drive;
-  Collector cole;
-  Storage sto;
-  Climber climb;
-  Shooter sho;
-  Timer t;
-  CameraServo _servo;
-  AnalogPotentiometer potenciometro;
-  // AHRS navx;
+  // CRIANDO OS OBJETOS
+
+  // CONTROLES (PILOTO E CO_PILOTO)
+  XboxController pilot;
+  XboxController co_pilot;
+  
+  // SUBSISTEMA COM PADRAO M_ NA FRENTE
+  Drivetrain m_drive;
+  Collector m_coll;
+  Storage m_sto;
+  Climber m_climb;
+  Shooter m_sho;
+
+  // COMANDO COM PADRAO C_ NA FRENTE
+  Autonomo c_auto;
+  
+  // SENSORES, ETC PADRAO _ NA FRENTE
+  Timer _t;
+  Camera _servo;
+  AnalogPotentiometer _poten;
+  AHRS _navx;
 
   public RobotContainer() {
 
-    // Definindo os objetos dos subsistemas no robotcontainer
-    control = new XboxController(Constants.Control_map._pilot);
-    control_2 = new XboxController(Constants.Control_map._copilot);
-    drive = new Drivetrain();
-    cole = new Collector();
-    sho = new Shooter();
-    t = new Timer();
-    sto = new Storage();
-    climb = new Climber();
-    _servo = new CameraServo();
-    // navx = new AHRS(Port.kUSB);
+    // DEFININDO CONTROLES (PILOTO E CO_PILOTO)
+    pilot = new XboxController(Constants.Control_map._pilot);
+    co_pilot = new XboxController(Constants.Control_map._copilot);
+    
+    // DEFININDO SUBSISTEMAS NO CONTAINER
+    m_drive = new Drivetrain();
+    m_coll = new Collector();
+    m_sho = new Shooter();
+    m_sto = new Storage();
+    m_climb = new Climber();
 
-    // POTENCIOMETRO CODIGO INTEIRO DELE FUNCIONAL potenciometro = new
-    // AnalogPotentiometer(0, 90, 0);
+    // DEFININDO SENSORES, ETC
+    _t = new Timer();
+    _servo = new Camera();
+    _poten = new AnalogPotentiometer(0, 90, 0);
+    
+    //TESTE
+    /* 
+    navx = new AHRS(Port.kUSB); 
+    */
 
     configureButtonBindings();
   }
 
   private void configureButtonBindings() {
-    /*
-     * // Drivetrain
-     * drive.setDefaultCommand(new RunCommand(() -> {
-     * drive.direction(-control.getLeftY(), control.getRightX());
-     * }, drive));
-     */
-    // Collector
-    cole.setDefaultCommand(new RunCommand(() -> {
 
-      // Collector
-      if (control.getRightBumper()) {
-        cole.collect(0.2);
-      } else if (control.getLeftBumper()) { // igual
-        cole.collect(-0.5);
+    // DRIVETRAIN
+    m_drive.setDefaultCommand(new RunCommand(() -> {
+      m_drive.direction(-pilot.getLeftY(), pilot.getRightX());
+    }, m_drive));
+
+    // COLLECTOR
+    m_coll.setDefaultCommand(new RunCommand(() -> {
+      
+      // COLLECTOR
+      if (pilot.getRightTriggerAxis() > 0) {
+        _t.start();
+        m_coll.collect(_t.get() * 0.5);
+      } else if (pilot.getBButton()) {
+        m_coll.collect(-0.5);
       } else {
-              // Limits do coletor
-      if (!cole.limitswitchBAIXO.get() && control.getAButton()) {
-        cole.collect(0.0);
-      } else if (!cole.limitswitchCIMA.get()) {
-        cole.collect(0.0);
-      } else {
-        cole.collect(0.0);
-      }
+        m_coll.collect(0.0);
+        _t.stop();
+        _t.reset();
       }
 
-      // TESTE POTENCIOMETRO FUNCIONAL
-      /*
-       * if (potenciometro.get() > 65) {
-       * cole.collect(0.4);
-       * }
-       */
-
-      // Move Collector
-      if (control_2.getAButton()) {
-        cole.move_c(0.5);
-      } else if (control_2.getBButton()) {
-        cole.move_c(-0.5);
+      // MOVE COLLECTOR
+      if (m_coll._limitSHORT.get() && pilot.getLeftTriggerAxis() > 0) {
+        m_coll.collect(0.0);
+      } else if (m_coll._limitUP.get() && pilot.getLeftBumper()) {
+        m_coll.collect(0.0);
       } else {
-        cole.move_c(0.0);
-      }
-
-
-
-    }, cole));
-
-    // Shooter
-    sho.setDefaultCommand(new RunCommand(() -> {
-
-      // Shooter
-      if (control.getRightTriggerAxis() > 0) {
-        t.start();
-        sho.shoot(t.get() * 0.5);
-      } else {
-        sho.shoot(0.0);
-        t.stop();
-        t.reset();
-      }
-
-      // Pitch
-
-      if (control.getRightY() > 0) {
-        sho.angle(0.6);
-      } else if (control.getRightY() < 0) {
-        sho.angle(-0.6);
-      } else {
-        if (control.getXButton() && sho.EP() <= 9) {
-          sho.angle(-0.6);
-        } else {
-          sho.angle(0.0);
+        if (pilot.getLeftTriggerAxis() > 0) {
+          m_coll.move_c(0.5);
+        } else if (co_pilot.getLeftBumper()) {
+          m_coll.move_c(-0.5);
+        } else
+          m_coll.move_c(0.0);
         }
+
+    }, m_coll));
+
+    // SHOOTER
+    m_sho.setDefaultCommand(new RunCommand(() -> {
+
+      // SHOOTER
+      if (co_pilot.getRightTriggerAxis() > 0) {
+        _t.start();
+        m_sho.shoot(_t.get() * 0.5);
+      } else {
+        m_sho.shoot(0.0);
+        _t.stop();
+        _t.reset();
       }
 
-      // Yaw
-      if (control_2.getLeftX() > 0) {
-        sho.rotation(0.5);
-      } else if (control_2.getLeftX() < 0) {
-        sho.rotation(-0.5);
+      // PITCH
+      if (pilot.getLeftY() > 0 && m_sho.EP() <= 18) {
+        m_sho.angle(-0.5);
+      } else if (pilot.getLeftY() < 0 && m_sho.EP() >= 0) {
+        m_sho.angle(0.5);
+      } else {
+        m_sho.angle(0.0);
       }
 
-    }, sho));
-
-    // Storage
-    sto.setDefaultCommand(new RunCommand(() -> {
-      SmartDashboard.putBoolean("estado", sto.estado);
-      // comando controle
-      if (control_2.getLeftTriggerAxis() > 0) {
-        sto.stor(0.5);
-      } else if (control_2.getLeftBumper()) { // igual
-        sto.stor(-0.5);
+      // YAW
+      if (co_pilot.getRightX() > 0) {
+        m_sho.rotation(0.5);
+      } else if (co_pilot.getRightX() < 0) {
+        m_sho.rotation(-0.5);
       }
-      // Sensor Storage
-      if (sto.sensorS1()) {
-        sto.stor(0.8);
+      
+      // SENSORS YAW
+      if (m_sho._limit_right.get() && co_pilot.getRightX() > 0) {
+        m_sho.rotation(0.0);
+      } else if (m_sho._limit_left.get() && co_pilot.getRightX() < 0) {
+        m_sho.rotation(0.0);
+      } else if (m_sho._limit_center.get()){
+        SmartDashboard.getBoolean("PONTO 0", true);
+      } else {
+        if (co_pilot.getRightX() > 0) {
+          m_sho.rotation(0.5);
+        } else if (co_pilot.getRightX() < 0) {
+          m_sho.rotation(-0.5);
+        } else
+          m_sho.rotation(0.0);
+        }
+
+    }, m_sho));
+
+    // STORAGE
+    m_sto.setDefaultCommand(new RunCommand(() -> {
+      SmartDashboard.putBoolean("estado", m_sto.estado);
+      
+      // STORAGE
+      if (co_pilot.getLeftTriggerAxis() > 0) {
+        m_sto.stor(0.5);
+      } else if (co_pilot.getBButton()) { // igual
+        m_sto.stor(-0.5);
+      }
+      
+      // SENSOR STORAGE
+      if (m_sto.sensorS1()) {
+        m_sto.stor(0.8);
       }
 
-    }, sto));
+    }, m_sto));
 
-    // Climb
-    /*
-     * climb.setDefaultCommand(new RunCommand(() -> {
-     * if (control.getBButton()) {
-     * climb.climbing(0.5);
-     * } else {
-     * climb.climbing(0.0);
-     * }
-     * }, climb));
-     */
-    // Servo
+    // CLIMB
+    m_climb.setDefaultCommand(new RunCommand(() -> {
+      
+      // CLIMB
+      if (co_pilot.getRightBumper()) {
+        m_climb.climbing(0.5);
+      } else if (co_pilot.getLeftBumper()) {
+        m_climb.climbing(-0.5);
+      } else {
+        m_climb.climbing(0.0);
+      }
+
+      // RISE CLIMB
+      if (co_pilot.getYButton()) {
+        m_climb.rise_climber(0.5);
+      } else {
+        m_climb.rise_climber(0.0);
+      }
+
+    }, m_climb));
+
+    // SERVO
     _servo.setDefaultCommand(new RunCommand(() -> {
-      if (control.getXButton()) {
-        _servo.servomov(sho.EP());
-      } 
-    }, _servo));
+      if (co_pilot.getLeftY() > 0) {
+        m_sho.servomov(m_sho.EP());
+      } else if (co_pilot.getBButton()) {
+        m_sho.servomov(m_sho.EP());
+      } else {
+        m_sho.servomov(0.0);
+      }
+    }, m_sho));
+
+    // TESTES
+    /*
+     * // TESTE POTENCIOMETRO FUNCIONAL
+     * if (potenciometro.get() > 65) {
+     * cole.collect(0.4);
+     * }
+     */
+
   }
 
+  // COMANDO AUTONOMO
   public Command getAutonomousCommand() {
-    return null;
+    return c_auto;
   }
 }
