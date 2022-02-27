@@ -27,8 +27,8 @@ public class Collector extends SubsystemBase {
     _coll_move = new VictorSPX(Constants.Motors.Collector._move_coll);
 
     // DEFININDO OS SENSORES DO SISTEMA DE MOVIMENTACAO DO COLETOR
-    _limitSHORT = new DigitalInput(5);
-    _limitUP = new DigitalInput(4);
+    _limitSHORT = new DigitalInput(Constants.Sensors._limit_short);
+    _limitUP = new DigitalInput(Constants.Sensors._limit_up);
 
   }
 

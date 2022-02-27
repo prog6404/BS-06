@@ -6,10 +6,12 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+//import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -24,9 +26,11 @@ public class Shooter extends SubsystemBase {
 
   // CRIANDO OS SENSORES DO SISTEMA DE PITCH E YAW
   public Encoder _encoderpitch;
+  public Encoder _encoderyaw;
   public DigitalInput _limit_left;
   public DigitalInput _limit_right;
   public DigitalInput _limit_center;
+  public PIDController _pid;
 
   public Shooter() {
     
@@ -49,12 +53,20 @@ public class Shooter extends SubsystemBase {
     _limit_right = new DigitalInput(Constants.Sensors._limit_right);
     _limit_center = new DigitalInput(Constants.Sensors._limit_center);
 
+    _encoderyaw = new Encoder(Constants.Encoders._enc_yaw1,Constants.Encoders._enc_yaw2);
+    _encoderyaw.setDistancePerPulse(1/48.0);
+    _pid = new PIDController(0.005, 0.0, 0.005);
+    _pid.setSetpoint(4000);
   }
 
   // CRIANDO FUNCAO DO SHOOTER
   public void shoot(double s) {
     _left.set(ControlMode.PercentOutput, s);
     _right.follow(_left);
+  }
+  // CRIANDO FUNCAO DO PID
+  public void fpid () {
+    _left.set(ControlMode.PercentOutput, _pid.calculate(_encoderyaw.getRate() * 60));
   }
 
   // CRIANDO FUNCAO DO PITCH
@@ -80,6 +92,6 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("key", EP());
+    SmartDashboard.putNumber("key", _pid.calculate(_encoderyaw.getRate() * 60));
   }
 }

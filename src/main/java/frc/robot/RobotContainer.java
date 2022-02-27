@@ -32,7 +32,7 @@ public class RobotContainer {
   // CONTROLES (PILOTO E CO_PILOTO)
   XboxController pilot;
   XboxController co_pilot;
-  
+
   // SUBSISTEMA COM PADRAO M_ NA FRENTE
   Drivetrain m_drive;
   Collector m_coll;
@@ -42,7 +42,7 @@ public class RobotContainer {
 
   // COMANDO COM PADRAO C_ NA FRENTE
   Autonomo c_auto;
-  
+
   // SENSORES, ETC PADRAO _ NA FRENTE
   Timer _t;
   Camera _servo;
@@ -54,7 +54,7 @@ public class RobotContainer {
     // DEFININDO CONTROLES (PILOTO E CO_PILOTO)
     pilot = new XboxController(Constants.Control_map._pilot);
     co_pilot = new XboxController(Constants.Control_map._copilot);
-    
+
     // DEFININDO SUBSISTEMAS NO CONTAINER
     m_drive = new Drivetrain();
     m_coll = new Collector();
@@ -66,11 +66,11 @@ public class RobotContainer {
     _t = new Timer();
     _servo = new Camera();
     _poten = new AnalogPotentiometer(0, 90, 0);
-    
-    //TESTE
-    /* 
-    navx = new AHRS(Port.kUSB); 
-    */
+
+    // TESTE
+    /*
+     * navx = new AHRS(Port.kUSB);
+     */
 
     configureButtonBindings();
   }
@@ -84,20 +84,18 @@ public class RobotContainer {
 
     // COLLECTOR
     m_coll.setDefaultCommand(new RunCommand(() -> {
-      
+
       // COLLECTOR
-      if (pilot.getRightTriggerAxis() > 0) {
-        _t.start();
-        m_coll.collect(_t.get() * 0.5);
+      if (pilot.getRightBumper()) {
+        m_coll.collect(0.5);
       } else if (pilot.getBButton()) {
         m_coll.collect(-0.5);
       } else {
         m_coll.collect(0.0);
-        _t.stop();
-        _t.reset();
       }
 
       // MOVE COLLECTOR
+
       if (m_coll._limitSHORT.get() && pilot.getLeftTriggerAxis() > 0) {
         m_coll.collect(0.0);
       } else if (m_coll._limitUP.get() && pilot.getLeftBumper()) {
@@ -109,21 +107,22 @@ public class RobotContainer {
           m_coll.move_c(-0.5);
         } else
           m_coll.move_c(0.0);
-        }
-
+      }
     }, m_coll));
 
     // SHOOTER
     m_sho.setDefaultCommand(new RunCommand(() -> {
 
       // SHOOTER
-      if (co_pilot.getRightTriggerAxis() > 0) {
+      if (pilot.getRightTriggerAxis() > 0) {
         _t.start();
-        m_sho.shoot(_t.get() * 0.5);
+        if (_t.get() >= 2) {
+          m_sho.fpid();
+        } else {
+          m_sho.shoot(Math.min(_t.get() * .5, 0.8556));
+        }
       } else {
         m_sho.shoot(0.0);
-        _t.stop();
-        _t.reset();
       }
 
       // PITCH
@@ -141,13 +140,13 @@ public class RobotContainer {
       } else if (co_pilot.getRightX() < 0) {
         m_sho.rotation(-0.5);
       }
-      
+
       // SENSORS YAW
       if (m_sho._limit_right.get() && co_pilot.getRightX() > 0) {
         m_sho.rotation(0.0);
       } else if (m_sho._limit_left.get() && co_pilot.getRightX() < 0) {
         m_sho.rotation(0.0);
-      } else if (m_sho._limit_center.get()){
+      } else if (m_sho._limit_center.get()) {
         SmartDashboard.getBoolean("PONTO 0", true);
       } else {
         if (co_pilot.getRightX() > 0) {
@@ -156,21 +155,26 @@ public class RobotContainer {
           m_sho.rotation(-0.5);
         } else
           m_sho.rotation(0.0);
-        }
+      }
+
+      // ENCODER YAW
+      if (m_sho._encoderyaw.get() > 1) {
+        SmartDashboard.putNumber("Encoder Yaw", m_sho._encoderyaw.getRate() * 60);
+      }
 
     }, m_sho));
 
     // STORAGE
     m_sto.setDefaultCommand(new RunCommand(() -> {
       SmartDashboard.putBoolean("estado", m_sto.estado);
-      
+
       // STORAGE
       if (co_pilot.getLeftTriggerAxis() > 0) {
         m_sto.stor(0.5);
       } else if (co_pilot.getBButton()) { // igual
         m_sto.stor(-0.5);
       }
-      
+
       // SENSOR STORAGE
       if (m_sto.sensorS1()) {
         m_sto.stor(0.8);
@@ -180,7 +184,7 @@ public class RobotContainer {
 
     // CLIMB
     m_climb.setDefaultCommand(new RunCommand(() -> {
-      
+
       // CLIMB
       if (co_pilot.getRightBumper()) {
         m_climb.climbing(0.5);
@@ -200,15 +204,17 @@ public class RobotContainer {
     }, m_climb));
 
     // SERVO
-    _servo.setDefaultCommand(new RunCommand(() -> {
-      if (co_pilot.getLeftY() > 0) {
-        m_sho.servomov(m_sho.EP());
-      } else if (co_pilot.getBButton()) {
-        m_sho.servomov(m_sho.EP());
-      } else {
-        m_sho.servomov(0.0);
-      }
-    }, m_sho));
+    /*
+     * _servo.setDefaultCommand(new RunCommand(() -> {
+     * if (co_pilot.getLeftY() > 0) {
+     * m_sho.servomov(m_sho.EP());
+     * } else if (co_pilot.getBButton()) {
+     * m_sho.servomov(m_sho.EP());
+     * } else {
+     * m_sho.servomov(0.0);
+     * }
+     * }, m_sho));
+     */
 
     // TESTES
     /*
