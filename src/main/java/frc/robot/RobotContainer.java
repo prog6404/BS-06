@@ -2,9 +2,9 @@
 package frc.robot;
 
 // IMPORTS
-import com.kauailabs.navx.frc.AHRS;
 // import com.kauailabs.vmx.AHRSJNI;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 // import edu.wpi.first.wpilibj.DigitalInput;
 // import edu.wpi.first.wpilibj.Encoder;
@@ -17,7 +17,6 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Collector;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.commands.Autonomo;
-import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Storage;
 // import pabeles.concurrency.ConcurrencyOps.Reset;
@@ -45,9 +44,9 @@ public class RobotContainer {
 
   // SENSORES, ETC PADRAO _ NA FRENTE
   Timer _t;
-  Camera _servo;
+  //Camera _servo;
   AnalogPotentiometer _poten;
-  AHRS _navx;
+  //AHRS _navx;
 
   public RobotContainer() {
 
@@ -64,7 +63,7 @@ public class RobotContainer {
 
     // DEFININDO SENSORES, ETC
     _t = new Timer();
-    _servo = new Camera();
+    //_servo = new Camera();
     _poten = new AnalogPotentiometer(0, 90, 0);
 
     // TESTE
@@ -86,7 +85,7 @@ public class RobotContainer {
     m_coll.setDefaultCommand(new RunCommand(() -> {
 
       // COLLECTOR
-      if (pilot.getRightBumper()) {
+      if (pilot.getRightTriggerAxis() > 0) {
         m_coll.collect(0.5);
       } else if (pilot.getBButton()) {
         m_coll.collect(-0.5);
@@ -96,16 +95,11 @@ public class RobotContainer {
 
       // MOVE COLLECTOR
 
-      if (m_coll._limitSHORT.get() && pilot.getLeftTriggerAxis() > 0) {
-        m_coll.collect(0.0);
-      } else if (m_coll._limitUP.get() && pilot.getLeftBumper()) {
-        m_coll.collect(0.0);
-      } else {
         if (pilot.getLeftTriggerAxis() > 0) {
           m_coll.move_c(0.5);
         } else if (co_pilot.getLeftBumper()) {
           m_coll.move_c(-0.5);
-        } else
+        } else {
           m_coll.move_c(0.0);
       }
     }, m_coll));
@@ -114,7 +108,7 @@ public class RobotContainer {
     m_sho.setDefaultCommand(new RunCommand(() -> {
 
       // SHOOTER
-      if (pilot.getRightTriggerAxis() > 0) {
+      if (co_pilot.getRightTriggerAxis() > 0) {
         _t.start();
         if (_t.get() >= 2) {
           m_sho.fpid();
@@ -125,59 +119,39 @@ public class RobotContainer {
         m_sho.shoot(0.0);
       }
 
-      // PITCH
-      if (pilot.getLeftY() > 0 && m_sho.EP() <= 18) {
+      // ENCODER SHOOTER
+      if (m_sho.encodershooterget() > 1) {
+        SmartDashboard.putNumber("Encoder Shooter", m_sho.encodershooterrate() * 60);
+      }
+
+      // PITCH/ENCODERPITCH
+      if (pilot.getLeftY() > 0) {
         m_sho.angle(-0.5);
-      } else if (pilot.getLeftY() < 0 && m_sho.EP() >= 0) {
+      } else if (pilot.getLeftY() < 0) {
         m_sho.angle(0.5);
       } else {
         m_sho.angle(0.0);
       }
-
+      
       // YAW
       if (co_pilot.getRightX() > 0) {
         m_sho.rotation(0.5);
       } else if (co_pilot.getRightX() < 0) {
         m_sho.rotation(-0.5);
-      }
-
-      // SENSORS YAW
-      if (m_sho._limit_right.get() && co_pilot.getRightX() > 0) {
-        m_sho.rotation(0.0);
-      } else if (m_sho._limit_left.get() && co_pilot.getRightX() < 0) {
-        m_sho.rotation(0.0);
-      } else if (m_sho._limit_center.get()) {
-        SmartDashboard.getBoolean("PONTO 0", true);
       } else {
-        if (co_pilot.getRightX() > 0) {
-          m_sho.rotation(0.5);
-        } else if (co_pilot.getRightX() < 0) {
-          m_sho.rotation(-0.5);
-        } else
-          m_sho.rotation(0.0);
-      }
-
-      // ENCODER YAW
-      if (m_sho._encoderyaw.get() > 1) {
-        SmartDashboard.putNumber("Encoder Yaw", m_sho._encoderyaw.getRate() * 60);
+        m_sho.rotation(0.0);
       }
 
     }, m_sho));
 
     // STORAGE
     m_sto.setDefaultCommand(new RunCommand(() -> {
-      SmartDashboard.putBoolean("estado", m_sto.estado);
 
       // STORAGE
       if (co_pilot.getLeftTriggerAxis() > 0) {
         m_sto.stor(0.5);
       } else if (co_pilot.getBButton()) { // igual
         m_sto.stor(-0.5);
-      }
-
-      // SENSOR STORAGE
-      if (m_sto.sensorS1()) {
-        m_sto.stor(0.8);
       }
 
     }, m_sto));
@@ -203,8 +177,17 @@ public class RobotContainer {
 
     }, m_climb));
 
-    // SERVO
+    
+
+    // TESTES
     /*
+     * // TESTE POTENCIOMETRO FUNCIONAL
+     * if (potenciometro.get() > 65) {
+     * cole.collect(0.4);
+     * }
+     * 
+     * 
+     * // SERVO
      * _servo.setDefaultCommand(new RunCommand(() -> {
      * if (co_pilot.getLeftY() > 0) {
      * m_sho.servomov(m_sho.EP());
@@ -214,14 +197,6 @@ public class RobotContainer {
      * m_sho.servomov(0.0);
      * }
      * }, m_sho));
-     */
-
-    // TESTES
-    /*
-     * // TESTE POTENCIOMETRO FUNCIONAL
-     * if (potenciometro.get() > 65) {
-     * cole.collect(0.4);
-     * }
      */
 
   }

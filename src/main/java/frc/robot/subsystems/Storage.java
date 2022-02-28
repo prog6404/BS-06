@@ -17,7 +17,6 @@ public class Storage extends SubsystemBase {
 
   // CRIANDO OS SENSORES DO SISTEMA DE ARMAZENADOR
   private DigitalInput _sensor_sto;
-  public boolean estado = false;
 
   public Storage() {
 
@@ -31,7 +30,7 @@ public class Storage extends SubsystemBase {
   // CRIANDO FUNCAO DO ARMAZENADOR
   public void stor(double vel) {
     _storage.set(VictorSPXControlMode.PercentOutput, vel);
-  } 
+  }
 
   // CRIANDO FUNCAO DOS SENSORES
   public boolean sensorS1() {
@@ -40,6 +39,8 @@ public class Storage extends SubsystemBase {
 
   @Override
   public void periodic() {
-
+    if (sensorS1()) {
+      stor(0.8);
+    }
   }
 }

@@ -25,15 +25,17 @@ public class Shooter extends SubsystemBase {
   private Servo _servo;
 
   // CRIANDO OS SENSORES DO SISTEMA DE PITCH E YAW
-  public Encoder _encoderpitch;
-  public Encoder _encoderyaw;
-  public DigitalInput _limit_left;
-  public DigitalInput _limit_right;
-  public DigitalInput _limit_center;
-  public PIDController _pid;
+  private Encoder _encoderpitch;
+  private DigitalInput _limit_p_up;
+  private DigitalInput _limit_p_short;
+  private Encoder _encodershooter;
+  private DigitalInput _limit_left;
+  private DigitalInput _limit_right;
+  private DigitalInput _limit_center;
+  private PIDController _pid;
 
   public Shooter() {
-    
+
     // DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
     _pitch = new VictorSPX(Constants.Motors.Shooter._pitch);
     _yaw = new VictorSPX(Constants.Motors.Shooter._yaw);
@@ -45,16 +47,19 @@ public class Shooter extends SubsystemBase {
     _servo = new Servo(9);
 
     // DEFININDO OS SENSORES DO SISTEMA DE PITCH E YAW
-    _encoderpitch = new Encoder(Constants.Encoders._enc_pitch1,Constants.Encoders._enc_pitch2);
-    _encoderpitch.setDistancePerPulse(1/44.4);
+    _encoderpitch = new Encoder(Constants.Encoders._enc_pitch1, Constants.Encoders._enc_pitch2);
+    _encoderpitch.setDistancePerPulse(1 / 44.4);
     _encoderpitch.setReverseDirection(true);
+
+    _limit_p_up = new DigitalInput(Constants.Sensors._limit_p_up);
+    _limit_p_short = new DigitalInput(Constants.Sensors._limit_p_short);
 
     _limit_left = new DigitalInput(Constants.Sensors._limit_left);
     _limit_right = new DigitalInput(Constants.Sensors._limit_right);
     _limit_center = new DigitalInput(Constants.Sensors._limit_center);
 
-    _encoderyaw = new Encoder(Constants.Encoders._enc_yaw1,Constants.Encoders._enc_yaw2);
-    _encoderyaw.setDistancePerPulse(1/48.0);
+    _encodershooter = new Encoder(Constants.Encoders._enc_yaw1, Constants.Encoders._enc_yaw2);
+    _encodershooter.setDistancePerPulse(1 / 48.0);
     _pid = new PIDController(0.005, 0.0, 0.005);
     _pid.setSetpoint(4000);
   }
@@ -64,23 +69,40 @@ public class Shooter extends SubsystemBase {
     _left.set(ControlMode.PercentOutput, s);
     _right.follow(_left);
   }
+
   // CRIANDO FUNCAO DO PID
-  public void fpid () {
-    _left.set(ControlMode.PercentOutput, _pid.calculate(_encoderyaw.getRate() * 60));
+  public void fpid() {
+    _left.set(ControlMode.PercentOutput, _pid.calculate(_encodershooter.getRate() * 60));
   }
 
   // CRIANDO FUNCAO DO PITCH
   public void angle(double a) {
-    _pitch.set(VictorSPXControlMode.PercentOutput, a);
+    if(encoderpitch() >= 18 && _limit_p_short.get()) {
+      _pitch.set(VictorSPXControlMode.PercentOutput, 0.0);
+    } if (encoderpitch() >= 0 && _limit_p_up.get()) {
+    _pitch.set(VictorSPXControlMode.PercentOutput, 0.0);
+    } else {
+      _pitch.set(VictorSPXControlMode.PercentOutput, a);
+    }
   }
 
   // CRIANDO FUNCAO DO YAW
   public void rotation(double y) {
-    _yaw.set(VictorSPXControlMode.PercentOutput, y);
+    if  (_limit_right.get() && y > 0.0){
+    _yaw.set(VictorSPXControlMode.PercentOutput, 0.0);
+    } else if (_limit_left.get() && y < 0.0) {
+      _yaw.set(VictorSPXControlMode.PercentOutput, 0.0);
+    } else {
+      _yaw.set(VictorSPXControlMode.PercentOutput, y);
+    }
+  }
+
+  public boolean limitcenteryaw() {
+    return _limit_center.get();
   }
 
   // CRIANDO FUNCAO DE ANGULACAO EM GRAUS DO PITCH
-  public double EP() {
+  public double encoderpitch() {
     // RETORNA QUANTIDADE DE GRAU ATUAL
     return (_encoderpitch.get() * 0.2895);
   }
@@ -90,8 +112,19 @@ public class Shooter extends SubsystemBase {
     _servo.setAngle(servoangle);
   }
 
+
+  // FUNCAO GET ENCODER
+  public double encodershooterget() {
+    return _encodershooter.get();
+  }
+
+  // FUNCAO RATE ENCODER
+  public double encodershooterrate() {
+    return _encodershooter.getRate();
+  }
+
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("key", _pid.calculate(_encoderyaw.getRate() * 60));
+    SmartDashboard.putBoolean("Limit", limitcenteryaw());
   }
 }

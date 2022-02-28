@@ -17,8 +17,8 @@ public class Collector extends SubsystemBase {
   private VictorSPX _coll_move;
 
   // CRIANDO OS SENSORES DO SISTEMA DE MOVIMENTACAO DO COLETOR
-  public DigitalInput _limitSHORT;
-  public DigitalInput _limitUP;
+  private DigitalInput _limitSHORT;
+  private DigitalInput _limitUP;
  
   public Collector() {
 
@@ -38,8 +38,15 @@ public class Collector extends SubsystemBase {
   }
 
   // FUNCAO DO SISTEMA DE MOVINTACAO DO COLETOR
+  // POSITIVO E NEGATIVO AINDA NÃO TESTADOS (CUIDADO!!!!)
   public void move_c(double move) {
-    _coll_move.set(ControlMode.PercentOutput, move);
+    if (_limitSHORT.get() && move < 0) {
+      _coll_move.set(ControlMode.PercentOutput, 0.0);
+    } else if (_limitUP.get() && move > 0) {
+      _coll_move.set(ControlMode.PercentOutput, 0.0);
+    } else {
+      _coll_move.set(ControlMode.PercentOutput, move);
+    }
   }
 
   @Override

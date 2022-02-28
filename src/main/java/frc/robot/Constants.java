@@ -7,10 +7,10 @@ public final class Constants {
     public static class Motors {
 
         public static class Drivetrain {
-            public static final int _leftfront = 0;
-            public static final int _leftback = 1;
-            public static final int _rightfront = 2;
-            public static final int _rightback = 3;
+            public static final int _leftfront = 3;
+            public static final int _leftback = 2;
+            public static final int _rightfront = 1;
+            public static final int _rightback = 0;
         }
 
         public static class Collector {
@@ -49,12 +49,14 @@ public final class Constants {
         public static final int _limit_right = 3;
         public static final int _limit_left = 4;
         public static final int _limit_center = 5;
+        public static final int _limit_p_short = 8;
+        public static final int _limit_p_up = 9;
     }
 
     public static class Encoders {
         public static final int _enc_pitch1 = 0;
         public static final int _enc_pitch2 = 1; 
-        public static final int _enc_yaw1 = 8;
-        public static final int _enc_yaw2 = 9;
+        public static final int _enc_yaw1 = 10;
+        public static final int _enc_yaw2 = 19;
     }
 }
