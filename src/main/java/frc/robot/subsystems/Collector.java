@@ -37,7 +37,7 @@ public class Collector extends SubsystemBase {
     _coll.set(ControlMode.PercentOutput, c);
   }
 
-  // FUNCAO DO SISTEMA DE MOVINTACAO DO COLETOR
+  // FUNCAO DO SISTEMA DE MOVIMENTACAO DO COLETOR
   // POSITIVO E NEGATIVO AINDA NÃO TESTADOS (CUIDADO!!!!)
   public void move_c(double move) {
     if (_limitSHORT.get() && move < 0) {

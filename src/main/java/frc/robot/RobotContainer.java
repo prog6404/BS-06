@@ -4,7 +4,7 @@ package frc.robot;
 // IMPORTS
 // import com.kauailabs.vmx.AHRSJNI;
 
-import edu.wpi.first.cameraserver.CameraServer;
+//import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 // import edu.wpi.first.wpilibj.DigitalInput;
 // import edu.wpi.first.wpilibj.Encoder;
@@ -78,7 +78,7 @@ public class RobotContainer {
 
     // DRIVETRAIN
     m_drive.setDefaultCommand(new RunCommand(() -> {
-      m_drive.direction(-pilot.getLeftY(), pilot.getRightX());
+      m_drive.direction(pilot.getRightX(),-pilot.getLeftY() );
     }, m_drive));
 
     // COLLECTOR

@@ -5,11 +5,15 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMaxAlternateEncoder;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.motorcontrol.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,7 +23,8 @@ import frc.robot.Constants;
 public class Shooter extends SubsystemBase {
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
-  private VictorSPX _left, _right, _yaw, _pitch;
+  private CANSparkMax _left, _right;
+  private VictorSPX _yaw, _pitch;
 
   // CRIANDO O SERVO
   private Servo _servo;
@@ -40,8 +45,8 @@ public class Shooter extends SubsystemBase {
     _pitch = new VictorSPX(Constants.Motors.Shooter._pitch);
     _yaw = new VictorSPX(Constants.Motors.Shooter._yaw);
 
-    _left = new VictorSPX(Constants.Motors.Shooter._left);
-    _right = new VictorSPX(Constants.Motors.Shooter._right);
+    _left = new CANSparkMax(Constants.Motors.Shooter._left, MotorType.kBrushed);
+    _right = new CANSparkMax(Constants.Motors.Shooter._right, MotorType.kBrushed);
 
     // DEFININDO O SERVO
     _servo = new Servo(9);
@@ -49,7 +54,7 @@ public class Shooter extends SubsystemBase {
     // DEFININDO OS SENSORES DO SISTEMA DE PITCH E YAW
     _encoderpitch = new Encoder(Constants.Encoders._enc_pitch1, Constants.Encoders._enc_pitch2);
     _encoderpitch.setDistancePerPulse(1 / 44.4);
-    _encoderpitch.setReverseDirection(true);
+    _encoderpitch.setReverseDirection(false);
 
     _limit_p_up = new DigitalInput(Constants.Sensors._limit_p_up);
     _limit_p_short = new DigitalInput(Constants.Sensors._limit_p_short);
@@ -66,13 +71,14 @@ public class Shooter extends SubsystemBase {
 
   // CRIANDO FUNCAO DO SHOOTER
   public void shoot(double s) {
-    _left.set(ControlMode.PercentOutput, s);
+    _left.set(s);
     _right.follow(_left);
+    
   }
 
   // CRIANDO FUNCAO DO PID
   public void fpid() {
-    _left.set(ControlMode.PercentOutput, _pid.calculate(_encodershooter.getRate() * 60));
+    _left.set(_pid.calculate(_encodershooter.getRate() * 60));
   }
 
   // CRIANDO FUNCAO DO PITCH

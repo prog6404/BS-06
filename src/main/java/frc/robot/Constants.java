@@ -7,8 +7,8 @@ public final class Constants {
     public static class Motors {
 
         public static class Drivetrain {
-            public static final int _leftfront = 3;
-            public static final int _leftback = 2;
+            public static final int _leftfront = 15;
+            public static final int _leftback = 5;
             public static final int _rightfront = 1;
             public static final int _rightback = 0;
         }
@@ -23,8 +23,8 @@ public final class Constants {
         }
 
         public static class Shooter {
-            public static final int _left = 15;
-            public static final int _right = 5;
+            public static final int _left = 3;
+            public static final int _right = 2;
             
             public static final int _pitch = 9;
             public static final int _yaw = 10;
@@ -54,9 +54,9 @@ public final class Constants {
     }
 
     public static class Encoders {
-        public static final int _enc_pitch1 = 0;
-        public static final int _enc_pitch2 = 1; 
+        public static final int _enc_pitch1 = 1;
+        public static final int _enc_pitch2 = 0; 
         public static final int _enc_yaw1 = 10;
-        public static final int _enc_yaw2 = 19;
+        public static final int _enc_yaw2 = 18;
     }
 }
