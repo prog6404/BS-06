@@ -7,15 +7,23 @@ package frc.robot.subsystems;
 // import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+
 
 // CODE
 public class Drivetrain extends SubsystemBase {
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE TRACAO
-  private Spark _lfront, _lback, _rfront, _rback;
+  //private Spark _lfront, _lback, _rfront, _rback;
+  
+  private WPI_TalonSRX _lfront, _lback, _rfront, _rback;
+  
 
   // CRIANDO O AGRUPAMENTO DOS CONTROLADORES
   private MotorControllerGroup _left, _right;
@@ -26,20 +34,24 @@ public class Drivetrain extends SubsystemBase {
     public Drivetrain() {
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE TRACAO
+    /*
     _lfront = new Spark (Constants.Motors.Drivetrain._leftfront);
     _lback = new Spark (Constants.Motors.Drivetrain._leftback);
     _rfront = new Spark(Constants.Motors.Drivetrain._rightfront);
     _rback = new Spark (Constants.Motors.Drivetrain._rightback);
-
-      /*
-    _lfront = new TalonSRX (Constants.Motors.Drivetrain._leftfront);
-    _lback = new TalonSRX (Constants.Motors.Drivetrain._leftback);
-    _rfront = new TalonSRX (Constants.Motors.Drivetrain._rightfront);
-    _rback = new TalonSRX (Constants.Motors.Drivetrain._rightback);
       */
 
 
+    
+      
+    _lfront = new WPI_TalonSRX (Constants.Motors.Drivetrain._leftfront);
+    _lback = new WPI_TalonSRX (Constants.Motors.Drivetrain._leftback);
+    _rfront = new WPI_TalonSRX (Constants.Motors.Drivetrain._rightfront);
+    _rback = new WPI_TalonSRX (Constants.Motors.Drivetrain._rightback);
+     
+    
     // DEFININDO OS AGRUPAMENTO DOS CONTROLADORES
+    
     _left = new MotorControllerGroup(_lfront, _lback);
     _right = new MotorControllerGroup(_rfront, _rback);
 

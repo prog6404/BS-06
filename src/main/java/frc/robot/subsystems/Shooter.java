@@ -2,18 +2,16 @@
 package frc.robot.subsystems;
 
 // IMPORTS
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.motorcontrol.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,7 +22,8 @@ public class Shooter extends SubsystemBase {
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
   private CANSparkMax _left, _right;
-  private VictorSPX _yaw, _pitch;
+  private VictorSPX /*_yaw,*/ _pitch;
+  private WPI_TalonSRX _yaw;
 
   // CRIANDO O SERVO
   private Servo _servo;
@@ -38,23 +37,26 @@ public class Shooter extends SubsystemBase {
   private DigitalInput _limit_right;
   private DigitalInput _limit_center;
   private PIDController _pid;
+  private contador _contador;
 
   public Shooter() {
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
     _pitch = new VictorSPX(Constants.Motors.Shooter._pitch);
-    _yaw = new VictorSPX(Constants.Motors.Shooter._yaw);
+    _yaw = new WPI_TalonSRX(Constants.Motors.Shooter._yaw);
 
     _left = new CANSparkMax(Constants.Motors.Shooter._left, MotorType.kBrushed);
     _right = new CANSparkMax(Constants.Motors.Shooter._right, MotorType.kBrushed);
 
     // DEFININDO O SERVO
-    _servo = new Servo(9);
+    _servo = new Servo(1);
 
     // DEFININDO OS SENSORES DO SISTEMA DE PITCH E YAW
-    _encoderpitch = new Encoder(Constants.Encoders._enc_pitch1, Constants.Encoders._enc_pitch2);
+    /* _encoderpitch = new Encoder(Constants.Encoders._enc_pitch1, Constants.Encoders._enc_pitch2);
     _encoderpitch.setDistancePerPulse(1 / 44.4);
-    _encoderpitch.setReverseDirection(false);
+    _encoderpitch.setReverseDirection(true); */
+
+    _contador = new contador();
 
     _limit_p_up = new DigitalInput(Constants.Sensors._limit_p_up);
     _limit_p_short = new DigitalInput(Constants.Sensors._limit_p_short);
@@ -71,9 +73,8 @@ public class Shooter extends SubsystemBase {
 
   // CRIANDO FUNCAO DO SHOOTER
   public void shoot(double s) {
-    _left.set(s);
-    _right.follow(_left);
-    
+    _left.set(-s);
+    _right.set(s);
   }
 
   // CRIANDO FUNCAO DO PID
@@ -82,25 +83,28 @@ public class Shooter extends SubsystemBase {
   }
 
   // CRIANDO FUNCAO DO PITCH
+  
+  
   public void angle(double a) {
+    /*
     if(encoderpitch() >= 18 && _limit_p_short.get()) {
       _pitch.set(VictorSPXControlMode.PercentOutput, 0.0);
     } if (encoderpitch() >= 0 && _limit_p_up.get()) {
     _pitch.set(VictorSPXControlMode.PercentOutput, 0.0);
-    } else {
-      _pitch.set(VictorSPXControlMode.PercentOutput, a);
     }
+    */
+      _pitch.set(VictorSPXControlMode.PercentOutput, a);
   }
+  
 
   // CRIANDO FUNCAO DO YAW
   public void rotation(double y) {
-    if  (_limit_right.get() && y > 0.0){
-    _yaw.set(VictorSPXControlMode.PercentOutput, 0.0);
+    /*if  (_limit_right.get() && y > 0.0){
+      _yaw.set(0.0);
     } else if (_limit_left.get() && y < 0.0) {
-      _yaw.set(VictorSPXControlMode.PercentOutput, 0.0);
-    } else {
-      _yaw.set(VictorSPXControlMode.PercentOutput, y);
-    }
+      _yaw.set(0.0);
+    } else {*/
+      _yaw.set(y);
   }
 
   public boolean limitcenteryaw() {
@@ -108,10 +112,10 @@ public class Shooter extends SubsystemBase {
   }
 
   // CRIANDO FUNCAO DE ANGULACAO EM GRAUS DO PITCH
-  public double encoderpitch() {
+ // public double encoderpitch() {
     // RETORNA QUANTIDADE DE GRAU ATUAL
-    return (_encoderpitch.get() * 0.2895);
-  }
+   // return (_encoderpitch.get() * 0.2895);
+  //}
 
   // CRIANDO FUNCAO DE ANGULACAO DO SERVO
   public void servomov(double servoangle) {
@@ -131,6 +135,10 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
+    //Pegando a função do contador com o valor
+    _contador.valuecont();
+    //Colocando o valor do contador na SmartDashboard
+    SmartDashboard.putNumber("cont", _contador.valuecont());
     SmartDashboard.putBoolean("Limit", limitcenteryaw());
   }
 }
