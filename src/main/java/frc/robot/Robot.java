@@ -24,7 +24,7 @@ public class Robot extends TimedRobot {
    RelativeEncoder m_encoder;
 
     /** Hardware */
-    
+
 
     WPI_TalonSRX _talon = new WPI_TalonSRX(1);
 
