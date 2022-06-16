@@ -131,10 +131,9 @@ public class RobotContainer {
 
     taloncontrl = new TalonSRX(1);
 
-    taloncontrl.getSensorCollection().
+    taloncontrl.getSensorCollection();
 
     SmartDashboard.putNumber("Posicao", taloncontrl.getSelectedSensorPosition());
-    
 
     // SHOOTER
     m_sho.setDefaultCommand(new RunCommand(() -> {

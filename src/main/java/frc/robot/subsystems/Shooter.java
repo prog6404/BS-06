@@ -37,7 +37,6 @@ public class Shooter extends SubsystemBase {
   private DigitalInput _limit_right;
   private DigitalInput _limit_center;
   private PIDController _pid;
-  private contador _contador;
 
   public Shooter() {
 
@@ -55,8 +54,6 @@ public class Shooter extends SubsystemBase {
     /* _encoderpitch = new Encoder(Constants.Encoders._enc_pitch1, Constants.Encoders._enc_pitch2);
     _encoderpitch.setDistancePerPulse(1 / 44.4);
     _encoderpitch.setReverseDirection(true); */
-
-    _contador = new contador();
 
     _limit_p_up = new DigitalInput(Constants.Sensors._limit_p_up);
     _limit_p_short = new DigitalInput(Constants.Sensors._limit_p_short);
@@ -136,9 +133,6 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     //Pegando a função do contador com o valor
-    _contador.valuecont();
-    //Colocando o valor do contador na SmartDashboard
-    SmartDashboard.putNumber("cont", _contador.valuecont());
     SmartDashboard.putBoolean("Limit", limitcenteryaw());
   }
 }

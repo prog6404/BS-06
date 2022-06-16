@@ -27,7 +27,7 @@ public final class Constants {
             public static final int _right = 2;
             
             public static final int _pitch = 10;
-            public static final int _yaw = 1;
+            public static final int _yaw = 17;
         }
         /*
         public static class Climber {
