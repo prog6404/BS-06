@@ -4,8 +4,10 @@ package frc.robot.subsystems;
 // IMPORTS
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.PneumaticsControlModule;
 //import edu.wpi.first.wpilibj.Encoder;
 //import edu.wpi.first.wpilibj.drive.KilloughDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,7 +18,8 @@ import frc.robot.Constants;
 public class Storage extends SubsystemBase {
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE ARAMAZENADOR
-  private VictorSPX _storage;
+  private WPI_TalonSRX _storage;
+
 
   // CRIANDO OS SENSORES DO SISTEMA DE ARMAZENADOR
   private DigitalInput _sensor_sto;
@@ -24,7 +27,7 @@ public class Storage extends SubsystemBase {
   public Storage() {
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE ARMAZENADOR
-    _storage = new VictorSPX(Constants.Motors.Storage._storage);
+    _storage = new WPI_TalonSRX(Constants.Motors.Storage._storage);
 
     // DEFININDO OS SENSORES DO SISTEMA DE ARMAZENADOR
     _sensor_sto = new DigitalInput(Constants.Sensors._sensor_sto);
@@ -32,7 +35,7 @@ public class Storage extends SubsystemBase {
 
   // CRIANDO FUNCAO DO ARMAZENADOR
   public void stor(double vel) {
-    _storage.set(VictorSPXControlMode.PercentOutput, vel);
+    _storage.set(vel);
   }
 
   // CRIANDO FUNCAO DOS SENSORES
@@ -43,7 +46,6 @@ public class Storage extends SubsystemBase {
   @Override
   // FAZENDO O ARMAZENADOR PUXAR QUANDO A BOLA PASSAR NO SENSOR
   public void periodic() {
-    SmartDashboard.putBoolean("lalala", _sensor_sto.get());
     /*if (sensorS1()) {
       stor(0.7);
     } else {

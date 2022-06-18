@@ -52,9 +52,9 @@ public class Autonomo extends CommandBase {
 
     //Shooting
     if (t_sho.get() < 2) {
-      _sho.shoot(0.1);
+      //_sho.shoot(0.1);
     } else {
-      _sho.shoot(0);
+      //_sho.shoot(0);
     }
 
     //Storage

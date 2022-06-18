@@ -19,23 +19,21 @@ public final class Constants {
         }
 
         public static class Storage {
-            public static final int _storage = 5;
+            public static final int _storage = 1;
         }  
 
         public static class Shooter {
             public static final int _left = 3;
             public static final int _right = 2;
             
-            public static final int _pitch = 10;
+            public static final int _pitch = 0; //Servo PWM
             public static final int _yaw = 17;
         }
-        /*
         public static class Climber {
             public static final int _climber_tube = 11;
             public static final int _climb_rise1 = 12;
             public static final int _climb_rise2 = 13;
         }
-        */
     }
 
     public static class Control_map {
@@ -64,14 +62,12 @@ public final class Constants {
     public static class Pneumatic {
         public static final int _solenoide_col1 = 7;
         public static final int _solenoide_col2 = 6;
-
     }
     public static class YawControl {
         
         public static final double _kp = 0.01;
         public static final double _ki = 0.0;
         public static final double _kd = 0.0;
-
     }
 
 }

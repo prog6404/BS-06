@@ -1,38 +1,25 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
 import edu.wpi.first.math.controller.PIDController;
-
-// IMPORTS
-// import com.kauailabs.vmx.AHRSJNI;
-
-//import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
-// import edu.wpi.first.wpilibj.DigitalInput;
-// import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-// import edu.wpi.first.wpilibj.SerialPort.Port;
-// import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import frc.robot.subsystems.Climber;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.commands.Autonomo;
 import frc.robot.subsystems.Collector;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.LimelightDetector;
-import frc.robot.commands.Autonomo;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Storage;
-// import pabeles.concurrency.ConcurrencyOps.Reset;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 
 // CODE
 public class RobotContainer {
 
-  // CRIANDO OS OBJETOS
+  //#region CRIANDO OS OBJETOS
 
   // CONTROLES (PILOTO E CO_PILOTO)
   XboxController pilot;
@@ -59,7 +46,7 @@ public class RobotContainer {
   //PID de controle do yaw
   PIDController yawControl;
 
-  private TalonSRX taloncontrl;
+  //#endregion
 
  
   public RobotContainer() {
@@ -71,11 +58,11 @@ public class RobotContainer {
     co_pilot = new XboxController(Constants.Control_map._copilot);
 
     // DEFININDO SUBSISTEMAS NO CONTAINER
-    m_drive     = new Drivetrain();
-    m_coll      = new Collector();
-    m_sho       = new Shooter();
+    //m_drive     = new Drivetrain();
+    //m_coll      = new Collector();
+    //m_sho       = new Shooter();
     m_sto       = new Storage();
-    m_limelight = new LimelightDetector();
+    //m_limelight = new LimelightDetector();
 
     // m_climb = new Climber();
 
@@ -83,7 +70,7 @@ public class RobotContainer {
     _t = new Timer();
 
     // _servo = new Camera();
-    _poten = new AnalogPotentiometer(0, 90, 0);
+    //_poten = new AnalogPotentiometer(0, 90, 0);
 
     // TESTE
     /*
@@ -95,12 +82,14 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
 
-    // DRIVETRAIN
-    m_drive.setDefaultCommand(new RunCommand(() -> {
+    //#region DRIVETRAIN
+    /*m_drive.setDefaultCommand(new RunCommand(() -> {
       m_drive.direction(pilot.getRightX(), -pilot.getLeftY());
     }, m_drive));
+    //*/
+    //#endregion
 
-    // COLLECTOR
+    //#region COLLECTOR
    /* m_coll.setDefaultCommand(new RunCommand(() -> {
 
       /*
@@ -123,9 +112,10 @@ public class RobotContainer {
         m_coll.collect(0.0);
       }
     }, m_coll));
-*/
+    //*/
+    //#endregion
 
-    m_limelight.setDefaultCommand(new RunCommand(() -> {
+    /*m_limelight.setDefaultCommand(new RunCommand(() -> {
 
     }, m_limelight));
 
@@ -133,8 +123,8 @@ public class RobotContainer {
 
     taloncontrl.getSensorCollection();
 
-    SmartDashboard.putNumber("Posicao", taloncontrl.getSelectedSensorPosition());
-
+    SmartDashboard.putNumber("Posicao", taloncontrl.getSelectedSensorPosition());//*/
+    /*
     // SHOOTER
     m_sho.setDefaultCommand(new RunCommand(() -> {
 
@@ -146,11 +136,11 @@ public class RobotContainer {
           //m_sho.fpid();
         } else {
           double d = Math.min(_t.get() * .5, 0.8556);
-          m_sho.shoot(0.3);
+          //m_sho.shoot(0.3);
           SmartDashboard.putNumber("d", d);
         }
       } else {
-        m_sho.shoot(0.0);
+        //m_sho.shoot(0.0);
         _t.reset();
       }
 
@@ -161,7 +151,7 @@ public class RobotContainer {
       }
       */
 
-      
+      /*
       // YAW (PID)
 
       yawControl.setSetpoint(0.0);
@@ -201,25 +191,16 @@ public class RobotContainer {
       }
       */
 
-      // PITCH
+    
 
-      if (co_pilot.getLeftY() > 0) {
-        m_sho.angle(-0.5);
-      } else if (co_pilot.getLeftY() < 0) {
-        m_sho.angle(0.5);
-      } else {
-        m_sho.angle(0.0);
-      }
-
-    }, m_sho));
+    //}, m_sho));
 
     // STORAGE
     m_sto.setDefaultCommand(new RunCommand(() -> {
-
       // STORAGE
       if (pilot.getAButton()) {
         m_sto.stor(0.5);
-      } else if (pilot.getLeftTriggerAxis() > 0) { // igual
+      } else if (pilot.getBButton()) { // igual
         m_sto.stor(-0.5);
       } else {
         m_sto.stor(0);
@@ -275,6 +256,6 @@ public class RobotContainer {
 
   // COMANDO AUTONOMO
   public Command getAutonomousCommand() {
-    return c_auto;
+    return null; //c_auto;
   }
 }

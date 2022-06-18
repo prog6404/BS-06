@@ -6,7 +6,11 @@ import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.EncoderType;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxRelativeEncoder.Type;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -22,117 +26,144 @@ public class Shooter extends SubsystemBase {
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
   private CANSparkMax _left, _right;
-  private VictorSPX /*_yaw,*/ _pitch;
   private WPI_TalonSRX _yaw;
 
   // CRIANDO O SERVO
-  private Servo _servo;
+  private Servo _pitch;
 
   // CRIANDO OS SENSORES DO SISTEMA DE PITCH E YAW
-  private Encoder _encoderpitch;
-  private DigitalInput _limit_p_up;
-  private DigitalInput _limit_p_short;
-  private Encoder _encodershooter;
   private DigitalInput _limit_left;
   private DigitalInput _limit_right;
   private DigitalInput _limit_center;
-  private PIDController _pid;
+
+  //PID ENCODER
+  public SparkMaxPIDController _pidController;
+  public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, rotations;
+  public RelativeEncoder _shoEnc;
+
+  
 
   public Shooter() {
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
-    _pitch = new VictorSPX(Constants.Motors.Shooter._pitch);
     _yaw = new WPI_TalonSRX(Constants.Motors.Shooter._yaw);
 
-    _left = new CANSparkMax(Constants.Motors.Shooter._left, MotorType.kBrushed);
+    _left  = new CANSparkMax(Constants.Motors.Shooter._left, MotorType.kBrushed);
     _right = new CANSparkMax(Constants.Motors.Shooter._right, MotorType.kBrushed);
 
-    // DEFININDO O SERVO
-    _servo = new Servo(1);
+    _pitch = new Servo(Constants.Motors.Shooter._pitch);
 
     // DEFININDO OS SENSORES DO SISTEMA DE PITCH E YAW
-    /* _encoderpitch = new Encoder(Constants.Encoders._enc_pitch1, Constants.Encoders._enc_pitch2);
-    _encoderpitch.setDistancePerPulse(1 / 44.4);
-    _encoderpitch.setReverseDirection(true); */
 
-    _limit_p_up = new DigitalInput(Constants.Sensors._limit_p_up);
-    _limit_p_short = new DigitalInput(Constants.Sensors._limit_p_short);
-
-    _limit_left = new DigitalInput(Constants.Sensors._limit_left);
-    _limit_right = new DigitalInput(Constants.Sensors._limit_right);
+    _limit_left   = new DigitalInput(Constants.Sensors._limit_left);
+    _limit_right  = new DigitalInput(Constants.Sensors._limit_right);
     _limit_center = new DigitalInput(Constants.Sensors._limit_center);
 
-    _encodershooter = new Encoder(Constants.Encoders._enc_yaw1, Constants.Encoders._enc_yaw2);
-    _encodershooter.setDistancePerPulse(1 / 48.0);
-    _pid = new PIDController(0.005, 0.0, 0.005);
-    _pid.setSetpoint(4000);
+    _left.setInverted(true);
+    _left.follow(_right);
+
+    _shoEnc = _right.getEncoder(Type.kQuadrature, 4096);
+    
+    _right.restoreFactoryDefaults();
+
+    /**
+     * In order to use PID functionality for a controller, a SparkMaxPIDController object
+     * is constructed by calling the getPIDController() method on an existing
+     * CANSparkMax object
+     */
+    _pidController = _right.getPIDController();
+  
+    /**
+     * The PID Controller can be configured to use the analog sensor as its feedback
+     * device with the method SetFeedbackDevice() and passing the PID Controller
+     * the CANAnalog object. 
+     */
+    _pidController.setFeedbackDevice(_shoEnc);
+
+    // PID coefficients
+    kP         = 0.1; 
+    kI         = 1e-4;
+    kD         = 1; 
+    kIz        = 0; 
+    kFF        = 0; 
+    kMaxOutput = 1; 
+    kMinOutput = -1;
+    rotations  = 0.0;
+
+    // set PID coefficients
+    _pidController.setP(kP);
+    _pidController.setI(kI);
+    _pidController.setD(kD);
+    _pidController.setIZone(kIz);
+    _pidController.setFF(kFF);
+    _pidController.setOutputRange(kMinOutput, kMaxOutput);
+
+    _shoEnc.setPosition(0.0);
+
   }
 
-  // CRIANDO FUNCAO DO SHOOTER
+  /*
   public void shoot(double s) {
-    _left.set(-s);
     _right.set(s);
   }
+  */
 
-  // CRIANDO FUNCAO DO PID
-  public void fpid() {
-    _left.set(_pid.calculate(_encodershooter.getRate() * 60));
-  }
+// CRIANDO FUNCAO DO SHOOTER
+public void shootActv(int rpm){
 
-  // CRIANDO FUNCAO DO PITCH
   
   
-  public void angle(double a) {
-    /*
-    if(encoderpitch() >= 18 && _limit_p_short.get()) {
-      _pitch.set(VictorSPXControlMode.PercentOutput, 0.0);
-    } if (encoderpitch() >= 0 && _limit_p_up.get()) {
-    _pitch.set(VictorSPXControlMode.PercentOutput, 0.0);
-    }
-    */
-      _pitch.set(VictorSPXControlMode.PercentOutput, a);
-  }
-  
+  PIDController shoPid = new PIDController(kP, kI, kD);
+
+  _right.set(shoPid.calculate(_shoEnc.getPosition(), rpm / 60));
+
+}
 
   // CRIANDO FUNCAO DO YAW
   public void rotation(double y) {
-    /*if  (_limit_right.get() && y > 0.0){
+    if  (_limit_right.get() && y > 0.0){
       _yaw.set(0.0);
     } else if (_limit_left.get() && y < 0.0) {
       _yaw.set(0.0);
-    } else {*/
+    } else {
       _yaw.set(y);
   }
+}
 
   public boolean limitcenteryaw() {
     return _limit_center.get();
   }
 
-  // CRIANDO FUNCAO DE ANGULACAO EM GRAUS DO PITCH
- // public double encoderpitch() {
-    // RETORNA QUANTIDADE DE GRAU ATUAL
-   // return (_encoderpitch.get() * 0.2895);
-  //}
-
   // CRIANDO FUNCAO DE ANGULACAO DO SERVO
   public void servomov(double servoangle) {
-    _servo.setAngle(servoangle);
-  }
-
-
-  // FUNCAO GET ENCODER
-  public double encodershooterget() {
-    return _encodershooter.get();
-  }
-
-  // FUNCAO RATE ENCODER
-  public double encodershooterrate() {
-    return _encodershooter.getRate();
+    _pitch.setAngle(servoangle);
   }
 
   @Override
   public void periodic() {
     //Pegando a função do contador com o valor
     SmartDashboard.putBoolean("Limit", limitcenteryaw());
+
+    double p   = kP;
+    double i   = kI;
+    double d   = kD;
+    double iz  = kIz;
+    double ff  = kFF;
+    double max = kMaxOutput;
+    double min = kMinOutput;
+    double rot = rotations;
+
+    if((p != kP)) { _pidController.setP(p); kP = p; }
+    if((i != kI)) { _pidController.setI(i); kI = i; }
+    if((d != kD)) { _pidController.setD(d); kD = d; }
+    if((iz != kIz)) { _pidController.setIZone(iz); kIz = iz; }
+    if((ff != kFF)) { _pidController.setFF(ff); kFF = ff; }
+    if((max != kMaxOutput) || (min != kMinOutput)) { 
+      _pidController.setOutputRange(min, max); 
+      kMinOutput = min; kMaxOutput = max; 
+    }
+
+    _pidController.setReference(rot, CANSparkMax.ControlType.kPosition);
+
   }
 }
