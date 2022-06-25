@@ -42,6 +42,7 @@ public class Autonomo extends CommandBase {
 
   //CÓDIGO NÃO TESTADO
   //ATENÇÃO QUANDO FOR LIGAR O AUTÔNOMO
+  // COMANDO AUTONOMO
   @Override
   public void execute() {
 

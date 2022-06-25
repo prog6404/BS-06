@@ -23,7 +23,7 @@ public final class Constants {
         }  
 
         public static class Shooter {
-            public static final int _left = 3;
+            public static final int _left  = 3;
             public static final int _right = 2;
             
             public static final int _pitch = 0; //Servo PWM
@@ -59,10 +59,12 @@ public final class Constants {
         public static final int _enc_yaw1 = 10;
         public static final int _enc_yaw2 = 18; 
     }
+    
     public static class Pneumatic {
         public static final int _solenoide_col1 = 7;
         public static final int _solenoide_col2 = 6;
     }
+    
     public static class YawControl {
         
         public static final double _kp = 0.01;
@@ -71,4 +73,3 @@ public final class Constants {
     }
 
 }
-//EVARISTO LINDO!!!
