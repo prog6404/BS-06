@@ -11,6 +11,7 @@ import frc.robot.subsystems.Storage;
 // CODE
 public class Autonomo extends CommandBase {
 
+  //#region CRIAÇAO DAS VARIAVEIS
   //Timers e classes que iremos utilizar no autonomo
   Drivetrain _drive;
   Storage _sto;
@@ -19,18 +20,21 @@ public class Autonomo extends CommandBase {
   Timer t_sto;
   Timer t_sho;
 
+  //#endregion
+
   public Autonomo(Drivetrain d, Shooter sh, Storage st) {
+
     addRequirements(d);
     addRequirements(sh);
     addRequirements(st);
 
     _drive = d;
-    _sho = sh;
-    _sto = st;
+    _sho   = sh;
+    _sto   = st;
 
     t_drive = new Timer();
-    t_sho = new Timer();
-    t_sto = new Timer();
+    t_sho   = new Timer();
+    t_sto   = new Timer();
   }
 
   @Override
@@ -40,15 +44,17 @@ public class Autonomo extends CommandBase {
     t_sto.start();
   }
 
-  //CÓDIGO NÃO TESTADO
-  //ATENÇÃO QUANDO FOR LIGAR O AUTÔNOMO
+  // CÓDIGO NÃO TESTADO
+  // ATENÇÃO QUANDO FOR LIGAR O AUTÔNOMO
+
   // COMANDO AUTONOMO
   @Override
   public void execute() {
 
+    
     //Drive
     if (t_drive.get() < 1) {
-      _drive.direction(0.1, 0);
+      _drive.move(0.1, 0);
     }
 
     //Shooting
@@ -65,7 +71,9 @@ public class Autonomo extends CommandBase {
       _sto.stor(0);
     }
 
+    //*/
   }
+
 
   @Override
   public void end(boolean interrupted) {}

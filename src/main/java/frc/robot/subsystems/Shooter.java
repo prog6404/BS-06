@@ -15,7 +15,6 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -40,21 +39,26 @@ public class Shooter extends SubsystemBase {
   private RelativeEncoder _shoEnc;
 
   // LIMELGHT
-  private NetworkTable table;
-  private NetworkTableEntry tx, tv, ta, ty;
+  private NetworkTable _table;
+  private NetworkTableEntry _tx, _tv, _ta, _ty;
 
   // PID YAW
-  PIDController _yawPID;
+  private PIDController _yawPID;
 
   // SHOOTER CONTROLE RPM
-  private Timer _tRPM;
-  private PIDController _shoPid;
   private boolean _shootActv = false;
   private double _RPM        = 5000.0;
-  private double _shoVel     = 0;
+  private double _shoVel     = 0.0;
 
   // PITCH
-  private double _pitchAngle = 0;
+  private double _minAngle    = 16;
+  private double _maxAngle    = 40;
+  private double _maxPosition = 1.0;
+
+  //CALCULO DE DISTANCIA
+  private double _valConvr = 215.0; //Valor de converçao do teste: raizQuadrada(altura^2 + distancia^2) * (porcentagem da area da fita)
+  private double _catHub   = Math.pow(238.0, 2); //Cateto da altura do hub
+
 
   //#endregion
 
@@ -64,7 +68,7 @@ public class Shooter extends SubsystemBase {
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
     //_yaw   = new WPI_TalonSRX(Constants.Motors.Shooter._yaw);
-    _left  = new CANSparkMax(Constants.Motors.Shooter._left, MotorType.kBrushed);
+    //_left  = new CANSparkMax(Constants.Motors.Shooter._left, MotorType.kBrushed);
     _right = new CANSparkMax(Constants.Motors.Shooter._right, MotorType.kBrushed);
     _pitch = new Servo(Constants.Motors.Shooter._pitch);
 
@@ -73,22 +77,24 @@ public class Shooter extends SubsystemBase {
     _limit_right  = new DigitalInput(Constants.Sensors._limit_right);
 
     // TABELA DE VALORES LIMELIGHT
-    table = NetworkTableInstance.getDefault().getTable("limelight");
-    tx = table.getEntry("tx");
-    tv = table.getEntry("tv");
-    ta = table.getEntry("ta");
-    ty = table.getEntry("ty");
+    _table = NetworkTableInstance.getDefault().getTable("limelight");
+    _tx = _table.getEntry("tx");
+    _tv = _table.getEntry("tv");
+    _ta = _table.getEntry("ta");
+    _ty = _table.getEntry("ty");
+
 
     // INVERSAO DA DIREÇAO DO MOTOR SHOOTER
-    _right.setInverted(true);
-    _left.setInverted(true);
-    _left.follow(_right);
+    //_right.setInverted(true);
+    //_left.setInverted(true);
+    //_left.follow(_right);
+    
 
     //#region ENCODER SHOOTER
 
     // DEFINE ENCODER SHOOTER
-    _shoEnc = _right.getEncoder(Type.kQuadrature, 4096);
     _right.restoreFactoryDefaults();
+    _shoEnc = _right.getEncoder(Type.kQuadrature, 4096);
 
     // PID DE CORREÇAO DO VALOR DO ENCODER
     _pidController = _right.getPIDController();
@@ -116,14 +122,7 @@ public class Shooter extends SubsystemBase {
     _shoEnc.setPosition(0.0);
 
     //#endregion
-
-    // TIMER RPM
-    _tRPM = new Timer();
-
-    // PID DO SHOOTER
-    _shoPid = new PIDController(0.000001, 0, 0);
-    _shoEnc.setPosition(0.0);
-
+    
     // PID DE CONTROLE DO YAW
     _yawPID = new PIDController(Constants.YawControl._kp, Constants.YawControl._ki, Constants.YawControl._kd);
     _yawPID.setTolerance(1.0);
@@ -162,33 +161,26 @@ public class Shooter extends SubsystemBase {
   // ATIVA O SHOOTER
   public void shootActv(){
 
-    if (!_shootActv){
-      _shoVel = 0;
-      _shoEnc.setPosition(0.0);
-      _shootActv = true;
-    }
-
     // CORRECAO DO ENCODER
-    _shoVel += _shoPid.calculate(_shoEnc.getVelocity(), _RPM);
-    SmartDashboard.putNumber("Correçao encoder", _shoVel);
+    //_shoVel += (_RPM - _shoEnc.getVelocity()) * 0.001; //Calculo proporcional
 
     // RPM DO SHOOTER
-    _right.set(_shoVel);
-    SmartDashboard.putNumber("RPM Encoder", _shoEnc.getVelocity());
-
+    _right.set(.56285);//_shoVel);
+//*/
 }
 
   // DESATIVA O SHOOTER
   public void shootDisab(){
 
-    _right.set(.0);
-    _shootActv = false;
-
+    _shoVel = 0;
+    _shoEnc.setPosition(0.0);
+    _right.set(0.0);
+  
 }
 
   // YAW
   public void rotation(double y) {
-
+/*
     if  (_limit_right.get() && y > 0.0){
       _yaw.set(0.0);
     } else if (_limit_left.get() && y < 0.0) {
@@ -200,36 +192,40 @@ public class Shooter extends SubsystemBase {
 }
 
   // RETORNA INDENTIFICAÇAO
-  public boolean islimelightDetected() {
+  public boolean isLimelightDetected() {
 
-    return tv.getDouble(0.0) == 1.0 ? true : false;
+    return _tv.getDouble(0.0) == 1.0 ? true : false;
   
   }
 
   // ATIVA CONTROLE DA LIMELIGHT NO YAW
-  public void limelghtYawControl(){
+  public void limelightYawControl(){
 
-    _yaw.set(_yawPID.calculate(tx.getDouble(1.0)));
+    //_yaw.set(_yawPID.calculate(_tx.getDouble(0.0)));
 
   }
 
   // ATIVA CONTROLE DA LIMELIGHT NO PITCH
-  public void limilightPitchControl() {
+  public void limelightPitchControl() {
 
-    _pitchAngle += ty.getDouble(0.0) * 0.01;
-    if (_pitchAngle < 0) _pitchAngle = 0;
-    else if (_pitchAngle > 1.0) _pitchAngle = 1.0;
-    _pitch.set(_pitchAngle);
+    _pitch.set((_ty.getDouble(0.0) + 15) + _maxAngle / ((_minAngle - _maxAngle) * _maxPosition));
 
   }
 
   // PITCH
-  public void servomov (double p) {
+  public void servoMov (double p) {
 
     _pitch.set(p);
 
-  }
+  } 
   
+  //CALCULA DISTANCIA ENTRE O ROBO E O HUB
+  public double distRoboHub(){
+    
+    return Math.sqrt(Math.pow(_valConvr / _ta.getDouble(0.0), 2) - _catHub); //catetoDistanciaRoboHub = raizQuadrada(hipotAtual - catetoDaAlturaDoHub)
+  
+  }
+
   // PERIODICA
   @Override
   public void periodic() {
@@ -238,11 +234,16 @@ public class Shooter extends SubsystemBase {
     encoderCorrection();
 
     // ATUALIZA A DISTANCIA DO ALVO EM RELACAO AO ROBO
-    if (ta.getDouble(0.0) >= 1.0) SmartDashboard.putString("Limelight Distancia", "Perto");
-    else if (ta.getDouble(0.0) <= 0.5) SmartDashboard.putString("Limelight Distancia", "Longe");
+    if (_ta.getDouble(0.0) >= 1.0) SmartDashboard.putString("Limelight Distancia", "Perto");
+    else if (_ta.getDouble(0.0) <= 0.5) SmartDashboard.putString("Limelight Distancia", "Longe");
     else SmartDashboard.putString("Limelight Distancia", "Medio");
+    //*/
 
-    SmartDashboard.putNumber("Angulo do Pitch", _pitchAngle);
+    //SmartDashboard.putNumber("Distancia Robo ao HUB", distRoboHub());
+    //SmartDashboard.putNumber("Angulo do Pitch", _pitchAngle);
+    SmartDashboard.putNumber("RPM Encoder", _shoEnc.getVelocity());
+    SmartDashboard.putNumber("Correçao encoder", _shoVel);
+    SmartDashboard.putBoolean("ShoAct", _shootActv);
 
   }
 }

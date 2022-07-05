@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.commands.Autonomo;
@@ -53,7 +54,7 @@ public class RobotContainer {
     co_pilot = new XboxController(Constants.Control_map._copilot);
 
     // DEFININDO SUBSISTEMAS NO CONTAINER
-    //m_drive = new Drivetrain();
+    m_drive = new Drivetrain();
     //m_coll  = new Collector();
     m_shot   = new Shooter();
     //m_stor   = new Storage();
@@ -118,23 +119,33 @@ public class RobotContainer {
     //#region SHOOTER
     
     m_shot.setDefaultCommand(new RunCommand(() -> {
-      
+
+      SmartDashboard.putBoolean("boo", co_pilot.getAButtonPressed());
       // SHOOTER
-      if (co_pilot.getRightTriggerAxis() > 0) m_shot.shootActv();
+      if (co_pilot.getAButton()) {
+        m_shot.shootActv();
+        System.out.println("jdsjdsjdo");
+      }
       else m_shot.shootDisab();
 
-      // YAW
-      if (m_shot.islimelightDetected()) {
-        
+      if (!m_shot.isLimelightDetected()) {
+     
+        // CONTROLE MANUAL PITCH/YAW
         if (co_pilot.getRightX() > 0) m_shot.rotation(0.5);
         else if (co_pilot.getRightX() < 0) m_shot.rotation(-0.5);
         else m_shot.rotation(0.0);
-        
-      } else m_shot.limelghtYawControl();
 
-      // PITCH
-      if (m_shot.islimelightDetected()) m_shot.limilightPitchControl();
-      else m_shot.servomov(co_pilot.getLeftY() / 2 + 0.5);
+        m_shot.servoMov(co_pilot.getLeftY() / 2 + 0.5);
+        
+      } else {
+      
+        // CONTROLE AUTOMATICO PITCH/YAW LIMELIGHT
+        //m_shot.limelightPitchControl();
+        //m_shot.limelightYawControl();
+      
+      }
+      
+      
 
     }, m_shot));
 
@@ -159,10 +170,12 @@ public class RobotContainer {
     //#endregion
 
     //#region TESTES
+
     
      //*/
 
       //#endregion
+  
   }
 
   // COMANDO AUTONOMO
