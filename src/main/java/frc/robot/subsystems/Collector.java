@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 
 // CODE
@@ -18,8 +19,8 @@ public class Collector extends SubsystemBase {
   public Collector() {
 
     // INICIALIZACAO DO COLETOR
-    //_coll     = new VictorSPX(Constants.Motors.Collector._collector);
-    //_solenoid = new WPI_TalonSRX(1);
+    _coll     = new VictorSPX(Constants.Motors.Collector._collector);
+    _solenoid = new WPI_TalonSRX(Constants.Soleinoid._coletor);
 
   }
 
@@ -29,9 +30,9 @@ public class Collector extends SubsystemBase {
   }
 
   // CONTROLE SOLENOID
-  public void collectorSolenoid (boolean activate){
+  public void collectorSolenoid (double sol){
     
-    _solenoid.set(activate ? 1.0 : 0);
+    _solenoid.set(sol);
 
   }
 

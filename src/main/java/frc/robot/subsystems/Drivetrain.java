@@ -2,10 +2,10 @@
 package frc.robot.subsystems;
 
 // IMPORTS
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -37,13 +37,15 @@ public class Drivetrain extends SubsystemBase {
   private PIDController _autEncPID;
 
   // CRIANDO OS CONTROLADORES DO SISTEMA DE TRACAO  
-  private WPI_TalonSRX _lfront, _lback, _rfront, _rback;
+  private WPI_TalonSRX _lFront, _lBack, _rFront, _rBack;
   
   // CRIANDO O AGRUPAMENTO DOS CONTROLADORES
   private MotorControllerGroup _left, _right;
   
   // CRIANDO O DIFERENCIAL DO SISTEMA DE TRACAO
   private DifferentialDrive _drive;
+
+  private Timer moveTime;
 
   //#endregion
 
@@ -52,14 +54,14 @@ public class Drivetrain extends SubsystemBase {
     //#region INICIALIZACAO DO SISTEMA
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE TRACAO 
-    _lfront = new WPI_TalonSRX (Constants.Motors.Drivetrain._leftfront);
-    _lback  = new WPI_TalonSRX (Constants.Motors.Drivetrain._leftback);
-    _rfront = new WPI_TalonSRX (Constants.Motors.Drivetrain._rightfront);
-    _rback  = new WPI_TalonSRX (Constants.Motors.Drivetrain._rightback);
+    _lFront = new WPI_TalonSRX (Constants.Motors.Drivetrain._left_front);
+    _lBack  = new WPI_TalonSRX (Constants.Motors.Drivetrain._left_back);
+    _rFront = new WPI_TalonSRX (Constants.Motors.Drivetrain._right_front);
+    _rBack  = new WPI_TalonSRX (Constants.Motors.Drivetrain._right_back);
     
     // DEFININDO OS AGRUPAMENTO DOS CONTROLADORES
-    _left  = new MotorControllerGroup(_lfront, _lback);
-    _right = new MotorControllerGroup(_rfront, _rback);
+    _left  = new MotorControllerGroup(_lFront, _lBack);
+    _right = new MotorControllerGroup(_rFront, _rBack);
 
     // DEFININDO O DIFERENCIAL DO SISTEMA DE TRACAO
     _drive = new DifferentialDrive(_left, _right);
@@ -73,10 +75,13 @@ public class Drivetrain extends SubsystemBase {
     _autEncPID.setPID(0.001, 0, 0);
     
     // CONFIGURAÇAO DOS ENCODERS
-    _lfront.configFactoryDefault();
-    _rfront.configFactoryDefault();
-    _lfront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);	
-    _rfront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
+    _lFront.configFactoryDefault();
+    _rFront.configFactoryDefault();
+    //_lFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
+    //_rFront.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 30);
+
+    moveTime = new Timer();
+    moveTime.start();
 
     //#endregion
 
@@ -104,14 +109,13 @@ public class Drivetrain extends SubsystemBase {
   // MOVE UMA DISTANCIA EM UMA DIREÇAO
   public void distancia (double vel, double dir, double dis) {
 
-    //_lfront.getSensorCollection().setQuadraturePosition(0, 10);
-    //_rfront.getSensorCollection().setQuadraturePosition(0, 10);
-
     // RESET ENCODERS
-    _lfront.setSelectedSensorPosition(0);
-    _rfront.setSelectedSensorPosition(0);
+    //_lFront.setSelectedSensorPosition(0);
+    //_rFront.setSelectedSensorPosition(0);
 
-    _autEncPID.setSetpoint(dis * 22);
+    moveTime.reset();
+
+    _autEncPID.setSetpoint(dis / 80);// * 22);
 
     move(_correctionVel * vel, dir);
     
@@ -120,22 +124,22 @@ public class Drivetrain extends SubsystemBase {
   // CONVERTE VALOR PERIODICO DOS ENCODERS PARA CONTINUO
   public double vc (char lado) {
 
-    if (3000 < Math.abs(_d - _rfront.getSelectedSensorPosition(1))){
+    if (3000 < Math.abs(_d - _rFront.getSelectedSensorPosition(1))){
 
-      if (_d > _rfront.getSelectedSensorPosition(1)) _revolutionD ++;
+      if (_d > _rFront.getSelectedSensorPosition(1)) _revolutionD ++;
       else _revolutionD --;
 
     }
 
-    if (3000 < Math.abs(_e - _lfront.getSelectedSensorPosition(0))){
+    if (3000 < Math.abs(_e - _lFront.getSelectedSensorPosition(0))){
 
-      if (_e > _lfront.getSelectedSensorPosition(0)) _revolutionE ++;
+      if (_e > _lFront.getSelectedSensorPosition(0)) _revolutionE ++;
       else _revolutionE --;
 
     }
 
-    _e = _lfront.getSelectedSensorPosition(0);
-    _d = _rfront.getSelectedSensorPosition(1);
+    _e = _lFront.getSelectedSensorPosition(0);
+    _d = _rFront.getSelectedSensorPosition(1);
 
     if (lado == 'd') return _revolutionD * 4094  + _d;
     else return _revolutionE * 4094  + _e;
@@ -147,7 +151,7 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
 
     SmartDashboard.putNumber("gyro", _gyro.getAngle());
-    _correction    = _autDirPID.calculate(_gyro.getAngle());
+    _correction    = _autDirPID.calculate(moveTime.get());//_gyro.getAngle());
     _correctionVel = _autEncPID.calculate((vc('e') + vc('d')) / 2);
 
   }

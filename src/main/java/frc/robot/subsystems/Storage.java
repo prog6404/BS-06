@@ -4,6 +4,7 @@ package frc.robot.subsystems;
 // IMPORTS
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -23,7 +24,7 @@ public class Storage extends SubsystemBase {
     _storage = new WPI_TalonSRX(Constants.Motors.Storage._storage);
 
     // DEFININDO OS SENSORES DO SISTEMA DE ARMAZENADOR
-    _sensor_sto = new DigitalInput(Constants.Sensors._sensor_sto);
+    _sensor_sto = new DigitalInput(Constants.Sensors._sensor_stor);
   }
 
   // CRIANDO FUNCAO DO ARMAZENADOR
