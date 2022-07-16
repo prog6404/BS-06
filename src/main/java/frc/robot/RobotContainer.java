@@ -1,7 +1,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.PowerDistribution;
 // IMPORTS
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -12,6 +11,7 @@ import frc.robot.Constants.Motors.Climber;
 import frc.robot.commands.Autonomo;
 import frc.robot.subsystems.Collector;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Storage;
 import frc.robot.subsystems.Tests;
@@ -34,6 +34,7 @@ public class RobotContainer {
   Climber m_climb;
   Shooter m_shot;
   Tests m_test;
+  Drive m_Drive;
 
   // COMANDO COM PADRAO C_ NA FRENTE
   Timer _d;
@@ -58,10 +59,11 @@ public class RobotContainer {
     // DEFININDO SUBSISTEMAS NO CONTAINER
     //m_drive = new Drivetrain();
     //m_coll  = new Collector();
-    m_shot  = new Shooter();
+    //m_shot  = new Shooter();
     //m_stor  = new Storage();
     //m_test  = new Tests();
     //m_climb = new Climber();
+    m_Drive  = new Drive();
 
     // DEFININDO SENSORES, ETC
     _t = new Timer();
@@ -126,7 +128,7 @@ public class RobotContainer {
     //#endregion
  
     //#region SHOOTER
-    ///*
+    /*
     m_shot.setDefaultCommand(new RunCommand(() -> {
 
       // SHOOTER
@@ -159,12 +161,12 @@ public class RobotContainer {
 
           _d.start();
           m_shot.resetPitch();
+          m_shot.setActivate(0);
 
         }
 
         reset    = true;
 
-        //m_shot.setActivate(0);
         
       }
 
@@ -175,7 +177,7 @@ public class RobotContainer {
         }
 
         SmartDashboard.putNumber("eeee", _d.get());
-
+        /*
       if (!m_shot.isLimelightDetected()) m_shot.rotation(co_pilot.getRightX());
       else m_shot.limelightYawControl(); // CONTROLE AUTOMATICO PITCH/YAW LIMELIGHT
 
@@ -216,7 +218,13 @@ public class RobotContainer {
      //*/
 
       //#endregion
-  
+  ///*
+    m_Drive.setDefaultCommand(new RunCommand(() -> {
+
+  	  m_Drive.jaguarDrive(-co_pilot.getLeftY(), co_pilot.getRightX());
+
+    }, m_Drive));
+    //*/
   }
 
   // COMANDO AUTONOMO

@@ -49,11 +49,12 @@ public class Drivetrain extends SubsystemBase {
 
   //#endregion
 
-    public Drivetrain() {
+  public Drivetrain() {
 
     //#region INICIALIZACAO DO SISTEMA
 
     // DEFININDO OS CONTROLADORES DO SISTEMA DE TRACAO 
+
     _lFront = new WPI_TalonSRX (Constants.Motors.Drivetrain._left_front);
     _lBack  = new WPI_TalonSRX (Constants.Motors.Drivetrain._left_back);
     _rFront = new WPI_TalonSRX (Constants.Motors.Drivetrain._right_front);

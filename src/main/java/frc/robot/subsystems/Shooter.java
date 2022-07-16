@@ -1,23 +1,20 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.VictorSPXControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-// IMPORTS
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+// IMPORTS
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
-
-import edu.wpi.first.hal.PWMJNI;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -27,7 +24,9 @@ public class Shooter extends SubsystemBase {
 
   // #region CRIAÇAO DAS VARIAVEIS
   // CRIANDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
-  private CANSparkMax _right, _left;
+  //private CANSparkMax _right, _left;
+  private WPI_TalonSRX _left;
+  private VictorSPX _right;
   private VictorSPX _yaw;
 
   // CRIANDO O SERVO
@@ -77,12 +76,11 @@ public class Shooter extends SubsystemBase {
     //#region INICIALIZAÇAO DOS SISTEMAS
 
     //#region DEFININDO OS CONTROLADORES DO SISTEMA DE SHOOTER, PITCH E YAW
-    _yaw   = new VictorSPX(10);
-    
-    /*_left       = new CANSparkMax (3, MotorType.kBrushed);
-    _right      = new CANSparkMax (2, MotorType.kBrushed);
+    //_yaw   = new VictorSPX(10);
+    _left  = new WPI_TalonSRX (1);
+    _right = new VictorSPX (13);
 
-    _right.setInverted(true);
+    _right.setInverted(false);
     _left.setInverted(false);
     _left.follow(_right);
     //*/
@@ -166,7 +164,7 @@ public class Shooter extends SubsystemBase {
   // ATIVA O SHOOTER
   public void setActivate(double rpm){
 
-    _right.set(rpm / 3400);
+    _right.set(ControlMode.PercentOutput, rpm / 3400);
 //*/
 }
 
@@ -193,7 +191,7 @@ public class Shooter extends SubsystemBase {
 ///*
   public void chute(boolean pitchDualMove) {
     limelightPitchControl(pitchDualMove);
-    //setActivate(1000);
+    setActivate(3400);
   }
 
 //*/
@@ -201,7 +199,7 @@ public class Shooter extends SubsystemBase {
   public void limelightPitchControl(boolean dual) {
 
     // Relaçao proporcional (linha direta)
-    _pitchPos = _ty.getDouble(_maxPosition);//SmartDashboard.getNumber("LL Angle", 16.0);
+    _pitchPos = _minAngle;//_ty.getDouble(_maxPosition);//SmartDashboard.getNumber("LL Angle", 16.0);
     _pitchPos = _pitchPos - _maxAngle;
     _pitchPos = _pitchPos / ((_minAngle - _maxAngle) / _maxPosition);
 
